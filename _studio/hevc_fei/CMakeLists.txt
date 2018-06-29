@@ -44,6 +44,7 @@ if( Linux OR Darwin )
     COMMAND date "+.%-y.%-m.%-d"
     OUTPUT_VARIABLE cur_date
     OUTPUT_STRIP_TRAILING_WHITESPACE
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
   string( SUBSTRING ${hevc_version} 0 1 ver )
 
