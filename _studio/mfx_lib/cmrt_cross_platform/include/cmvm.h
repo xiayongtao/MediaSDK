@@ -967,7 +967,6 @@ matrix<T, R, C>::matrix(const matrix<T2, R2, C2>& src, const uint sat)
     : array_2d_(data)
 #endif
 {
-    static const bool conformable = check_true<R*C == R2*C2>::value;
     assert(R*C == R2*C2);
 
     uint sat1 = 0;
@@ -984,7 +983,6 @@ matrix<T, R, C>::matrix(const matrix_ref<T2, R2, C2>& src, const uint sat)
     : array_2d_(data)
 #endif
 {
-    static const bool conformable = check_true<R*C == R2*C2>::value;
     assert(R*C == R2*C2);
 
     uint sat1 = 0;
@@ -1023,8 +1021,8 @@ template <typename T, uint R, uint C>
 template <typename T2, uint R2, uint C2>
 matrix<T, R, C>& matrix<T, R, C>::operator = (const matrix<T2, R2, C2>& src)
 {
-    CM_STATIC_ERROR(R*C == R2*C2, "matrices have different dimensions"); \
-        static const bool conformable = check_true<R*C == R2*C2>::value;
+    CM_STATIC_ERROR(R*C == R2*C2, "matrices have different dimensions");
+
     assert(R*C == R2*C2);
 
     uint sat1 = 0;
@@ -1040,8 +1038,7 @@ template <typename T, uint R, uint C>
 template <typename T2, uint R2, uint C2>
 matrix<T, R, C>& matrix<T, R, C>::operator = (const matrix_ref<T2, R2, C2>& src)
 {
-    CM_STATIC_ERROR(R*C == R2*C2, "matrices have different dimensions"); \
-        static const bool conformable = check_true<R*C == R2*C2>::value;
+    CM_STATIC_ERROR(R*C == R2*C2, "matrices have different dimensions");
     assert(R*C == R2*C2);
 
     uint sat1 = 0;
@@ -1061,7 +1058,6 @@ template <typename T, uint R, uint C> \
 template <typename T2> \
 matrix<T,R,C>& matrix<T,R,C>::operator OP##= (const T2 x) \
 { \
-        static const bool type_conformable = cmtype<T2>::value; \
         uint sat1 = 0; \
         for (uint i=0; i < SZ; i++) { \
             SIMDCF_WRAPPER(this->getref(i) = CmEmulSys::satur<T>::saturate((*this).get(i) OP x, sat1), SZ, i); \
@@ -1073,7 +1069,6 @@ template <typename T2, uint R2, uint C2> \
 matrix<T,R,C>& matrix<T,R,C>::operator OP##= (const matrix<T2,R2,C2>& x) \
 { \
         CM_STATIC_ERROR(R*C == R2*C2, "matrices have different dimensions"); \
-        static const bool conformable = check_true<R*C == R2*C2>::value; \
         assert(R*C == R2*C2); \
         uint sat1 = 0; \
         vector<T2, /*SZ*/R*C> in_x; in_x.assign(x); \
@@ -1087,7 +1082,6 @@ template <typename T2, uint R2, uint C2> \
 matrix<T,R,C>& matrix<T,R,C>::operator OP##= (const matrix_ref<T2,R2,C2>& x) \
 { \
         CM_STATIC_ERROR(R*C == R2*C2, "matrices have different dimensions"); \
-        static const bool conformable = check_true<R*C == R2*C2>::value; \
         assert(R*C == R2*C2); \
         uint sat1 = 0; \
         vector<T2, /*SZ*/R*C> in_x; in_x.assign(x); \
@@ -1142,10 +1136,6 @@ template <uint R2, uint VS, uint WD, uint HS>
 const vector<T, R2*WD> matrix<T, R, C>::genx_select(OFFSET ioff, OFFSET joff)
 {
     CM_STATIC_ERROR((!std::is_same<T, double>::value), "genx_select is not supported for matrices with element type of 'double'");
-    static const bool conformable1 = check_true<(R2 > 0)>::value;
-    static const bool conformable2 = check_true<(VS >= 0)>::value;
-    static const bool conformable3 = check_true<(WD > 0)>::value;
-    static const bool conformable4 = check_true<(HS >= 0)>::value;
     assert(R2 >= 0 && VS >= 0 && WD >= 0 && HS >= 0);
 
     assert(ioff < R);
@@ -1163,8 +1153,6 @@ template <typename T, uint R, uint C>
 template <typename T2, uint WD>
 vector<T, WD> matrix<T, R, C>::iselect(const vector<T2, WD>& index)
 {
-    static const bool conformable1 = check_true<(WD > 0)>::value;
-    static const bool type_conformable = is_inttype<T2>::value;
     assert(WD >= 0 && R >= 0 && C >= 0);
 
     for (uint i = 0; i < WD; i++) {
@@ -1182,8 +1170,6 @@ template <typename T, uint R, uint C>
 template <typename T2, uint WD>
 vector<T, WD> matrix<T, R, C>::iselect(const vector_ref<T2, WD>& index)
 {
-    static const bool conformable1 = check_true<(WD > 0)>::value;
-    static const bool type_conformable = is_inttype<T2>::value;
     assert(WD >= 0 && R >= 0 && C >= 0);
 
     for (uint i = 0; i < WD; i++) {
@@ -1203,8 +1189,6 @@ template <typename T2, uint WD>
 vector<T, WD> matrix<T, R, C>::iselect(const vector<T2, WD>& index_x, const vector<T2, WD>& index_y)
 {
     CM_STATIC_WARNING((std::is_unsigned<T2>::value), "iselect index vector element type must be unsigned");
-    static const bool conformable1 = check_true<(WD > 0)>::value;
-    static const bool type_conformable = is_inttype<T2>::value;
     assert(WD >= 0 && R >= 0 && C >= 0);
 
     for (uint i = 0; i < WD; i++) {
@@ -1224,8 +1208,6 @@ template <typename T2, uint WD>
 vector<T, WD> matrix<T, R, C>::iselect(const vector_ref<T2, WD>& index_x, const vector<T2, WD>& index_y)
 {
     CM_STATIC_WARNING((std::is_unsigned<T2>::value), "iselect index vector element type must be unsigned");
-    static const bool conformable1 = check_true<(WD > 0)>::value;
-    static const bool type_conformable = is_inttype<T2>::value;
     assert(WD >= 0 && R >= 0 && C >= 0);
 
     for (uint i = 0; i < WD; i++) {
@@ -1246,8 +1228,6 @@ template <typename T2, uint WD>
 vector<T, WD> matrix<T, R, C>::iselect(const vector<T2, WD>& index_x, const vector_ref<T2, WD>& index_y)
 {
     CM_STATIC_WARNING((std::is_unsigned<T2>::value), "iselect index vector element type must be unsigned");
-    static const bool conformable1 = check_true<(WD > 0)>::value;
-    static const bool type_conformable = is_inttype<T2>::value;
     assert(WD >= 0 && R >= 0 && C >= 0);
 
     for (uint i = 0; i < WD; i++) {
@@ -1267,8 +1247,6 @@ template <typename T2, uint WD>
 vector<T, WD> matrix<T, R, C>::iselect(const vector_ref<T2, WD>& index_x, const vector_ref<T2, WD>& index_y)
 {
     CM_STATIC_WARNING((std::is_unsigned<T2>::value), "iselect index vector element type must be unsigned");
-    static const bool conformable1 = check_true<(WD > 0)>::value;
-    static const bool type_conformable = is_inttype<T2>::value;
     assert(WD >= 0 && R >= 0 && C >= 0);
 
     for (uint i = 0; i < WD; i++) {
